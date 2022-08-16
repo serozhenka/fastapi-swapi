@@ -31,9 +31,38 @@
     </nav>
 
     <div class="text-center mt-5">
-        <button type="button" class="btn btn-primary">Collect New Data</button>
+        <button id="submit-btn" type="button" class="btn btn-primary">Collect New Data</button>
     </div>
 
+    <div class="toast-container position-fixed top-0 end-50 p-3" style="transform: translateX(50%)">
+        <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="2000">
+            <div class="toast-header">
+                <strong class="me-auto">Notification</strong>
+                <small>now</small>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div id="toast-body" class="toast-body">
+                Hello, world! This is a toast message.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let btn = document.getElementById('submit-btn')
+        let toastBlock = document.getElementById('liveToast')
+        let toastBody = document.getElementById('toast-body')
+
+        btn.addEventListener('click', async function() {
+            await fetch('/fetch/characters')
+            .then(response => response.json())
+            .then(data => {
+                    toastBody.innerText = data.detail
+                }
+            )
+            const toast = new bootstrap.Toast(toastBlock)
+            toast.show()
+        })
+    </script>
 
 </body>
 </html>
