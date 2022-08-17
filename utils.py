@@ -28,13 +28,26 @@ def get_data_list_from_character(character: dict, planets: dict) -> list:
     ]
 
 
-def fetch_characters(characters_url: str) -> list[dict]:
-    characters = []
-    while characters_url:
-        response = requests.get(characters_url)
-        characters_url = response.json().get('next')
-        characters.extend(response.json().get('results'))
-    return characters
+def fetch_and_write_characters(planets: dict, characters_url: str) -> str:
+    formatted_time = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
+    filename = f"csv_files/csv_{formatted_time}.csv"
+
+    with open(filename, 'a', encoding='utf-8') as file:
+        csv_writer = csv.writer(file)
+        csv_writer.writerow(csv_headers)
+
+        while characters_url:
+            response = requests.get(characters_url)
+            characters_url = response.json().get('next')
+            characters = response.json().get('results')
+
+            for character in characters:
+                row = get_data_list_from_character(character, planets)
+                csv_writer.writerow(row)
+
+            del characters
+
+    return filename
 
 
 def fetch_planets(planets_url: str) -> dict[str, str]:
