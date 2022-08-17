@@ -69,12 +69,13 @@
                     let parsedKey = JSON.parse(generalKey)
                     addTableRow(generalKey, parsedKey, i)
                 })
+                applySort()
             }
         }
 
         function addTableHeader(element, text) {
             element.innerHTML += `
-                <td scope="col" class="text-light">${text}</td>
+                <th id="header-${text}" scope="col" class="text-light">${text}</th>
             `
         }
 
@@ -102,6 +103,43 @@
                 grouped[stringifedKey] = grouped[stringifedKey] + 1
             })
         }
+
+        function createArrowElement(order) {
+            let element = document.createElement('div')
+            element.id = "sort-arrow"
+            element.classList.add("arrow", order ? "down-arrow": "up-arrow", "d-inline-block")
+            return element
+        }
+
+
+        function applySort() {
+            let th = document.getElementById(`header-Count`)
+            th.addEventListener('click', function () {
+                document.getElementById('sort-arrow')?.remove()
+                th.appendChild(createArrowElement(this.asc))
+                const table = th.closest('table')
+                const tbody = table.querySelector('tbody');
+
+                Array.from(tbody.querySelectorAll('tr'))
+                    .sort(comparer(Array.from(th.parentNode.children).indexOf(th), this.asc = !this.asc))
+                    .forEach(tr => tbody.appendChild(tr));
+            })
+        }
+
+
+        function getCellValue(tr, idx) {
+            let result = tr.children[idx].innerText || tr.children[idx].textContent
+            result = result.replace(/[$%,]/g, "")
+            return result;
+        }
+
+
+        function comparer(idx, asc) {
+            return function(a, b) {
+                return function(v1, v2) {
+                    return v1 !== '' && v2 !== '' && !isNaN(v1) && !isNaN(v2) ? (asc ? 1 : -1) * (v1 - v2) : v1.toString().localeCompare(v2);
+                }(getCellValue(a, idx), getCellValue(b, idx));
+        }}
 
     </script>
 

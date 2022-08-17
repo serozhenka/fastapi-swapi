@@ -13,3 +13,20 @@ a {
 .bg-light-gray {
     background-color: #d2d2d2;
 }
+
+.arrow {
+    width: 0;
+    height: 0;
+    vertical-align: middle;
+    margin-left: 4px;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+}
+
+.up-arrow {
+    border-bottom: 5px solid white;
+}
+
+.down-arrow {
+    border-top: 5px solid white;
+}

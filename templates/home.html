@@ -25,6 +25,7 @@
         let toastBody = document.getElementById('toast-body')
 
         btn.addEventListener('click', async function() {
+            btn.setAttribute('disabled', true)
             await fetch('/fetch/characters')
             .then(response => response.json())
             .then(data => {
@@ -33,6 +34,7 @@
             )
             const toast = new bootstrap.Toast(toastBlock)
             toast.show()
+            btn.removeAttribute('disabled')
         })
     </script>
 
