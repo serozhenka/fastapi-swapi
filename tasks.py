@@ -15,6 +15,6 @@ app = Celery(broker=REDIS_URL)
 @shared_task
 def fetch_characters_create_csv():
     planets = utils.fetch_planets(planets_url)
-    filename = utils.fetch_and_write_characters(planets, characters_url)
-    # filename = utils.write_characters_to_csv(characters, planets)
+    characters_generator = utils.fetch_characters(characters_url)
+    filename = utils.write_characters_to_csv(characters_generator, planets)
     asyncio.get_event_loop().run_until_complete(utils.create_csv_file_model(filename))
