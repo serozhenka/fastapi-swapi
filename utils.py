@@ -31,10 +31,9 @@ def get_data_list_from_character(character: dict, planets: dict) -> list:
 def fetch_characters(characters_url: str) -> list[dict]:
     characters = []
     while characters_url:
-        response = requests.get(characters_url + "?page=4")
+        response = requests.get(characters_url)
         characters_url = response.json().get('next')
-        characters.extend(response.json()['results'])
-        break
+        characters.extend(response.json().get('results'))
     return characters
 
 
@@ -68,7 +67,7 @@ def write_characters_to_csv(characters: list, planets: dict) -> str:
 async def create_csv_file_model(filename: str):
     await Tortoise.init(db_url=DATABASE_URL, modules={"models": ["models"]})
     await Tortoise.generate_schemas()
-    await CsvFile.create(filename=filename)
+    await CsvFile.create(filename=filename.replace('csv_files/', ''))
 
 
 async def update_last_fetch():

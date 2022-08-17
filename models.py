@@ -1,6 +1,7 @@
 import datetime
 
 from tortoise import models, fields
+from tortoise.contrib.pydantic import pydantic_model_creator
 
 
 class CsvFile(models.Model):
@@ -24,3 +25,5 @@ class LastFetch(models.Model):
 
     def __str__(self):
         return "last_fetch"
+
+CsvFile_Pydantic = pydantic_model_creator(CsvFile, name="csv-file")
