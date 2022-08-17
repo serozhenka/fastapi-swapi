@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <div class="row mx-0">
+        <div class="col-10 mx-auto">
+            <h2 class="mt-3">{{ filename }}</h2>
+
+            <div id="headers-buttons" class="d-flex">
+
+            </div>
+
+            <table class="table table-striped mt-3">
+                <thead style="background-color: #8a8a8a">
+                    <tr id="headers-tr"></tr>
+                </thead>
+                <tbody id="table-body">
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% include 'fetch_detail_js.html' %}
+
+    <script>
+        let headersTr = document.getElementById('headers-tr')
+        let tableBody = document.getElementById('table-body')
+        let headersButtons = document.getElementById('headers-buttons')
+        let filename = "{{ filename }}"
+        let results = [], spHeaders = [], clicked = [], offset = 0, grouped = {}
+
+        fetchCsvFile()
+        .then(headers => {
+            spHeaders = headers.split(',')
+            spHeaders[spHeaders.length - 1] = spHeaders[spHeaders.length - 1].replace('\r\r', '')
+            spHeaders.forEach(header => {
+                headersButtons.innerHTML += `
+                    <div id="headers-button-${header}" class="border py-1 px-3">${header}</div>
+                `
+            })
+
+            spHeaders.forEach(header => {
+              document.getElementById(`headers-button-${header}`).addEventListener('click', function(e) {
+                    let index = spHeaders.indexOf(e.target.innerText)
+
+                    if (e.target.classList.contains('bg-light-gray')) { e.target.classList.remove('bg-light-gray') }
+                    else { e.target.classList.add('bg-light-gray') }
+
+                    if (clicked.includes(index)) { clicked.splice(clicked.indexOf(index), 1) }
+                    else { clicked.push(index) }
+
+                    formTable(clicked)
+                })
+            })
+        })
+
+
+        function formTable(keys) {
+            headersTr.innerHTML = ''
+            tableBody.innerHTML = ''
+
+            keys.forEach(key => { addTableHeader(headersTr, spHeaders[key]) })
+            if (keys.length) {
+                addTableHeader(headersTr, 'Count')
+                groupResults(keys)
+
+                Object.keys(grouped).forEach((generalKey, i) => {
+                    let parsedKey = JSON.parse(generalKey)
+                    addTableRow(generalKey, parsedKey, i)
+                })
+            }
+        }
+
+        function addTableHeader(element, text) {
+            element.innerHTML += `
+                <td scope="col" class="text-light">${text}</td>
+            `
+        }
+
+        function addTableRow(generalKey, parsedKey, i) {
+            tableBody.innerHTML += `<tr id="${i}_tr"></tr>`
+            let tr = document.getElementById(`${i}_tr`)
+
+            Object.keys(parsedKey).forEach(key => {
+                tr.innerHTML += `<td>${parsedKey[key]}</td>`
+            })
+
+            tr.innerHTML += `<td>${grouped[generalKey]}</td>`
+        }
+
+        function groupResults(keys) {
+            grouped = {}
+            results.forEach(item => {
+                let generalKey = {}
+                keys.forEach(key => {
+                  generalKey[spHeaders[key]] = item[key]
+                })
+                let stringifedKey = JSON.stringify(generalKey)
+
+                if (grouped[stringifedKey] === undefined) { grouped[stringifedKey] = 0 }
+                grouped[stringifedKey] = grouped[stringifedKey] + 1
+            })
+        }
+
+    </script>
+
+{% endblock content %}

@@ -1,3 +1,15 @@
 a {
     text-decoration: none!important;
 }
+
+#headers-buttons > div {
+    transition: all .3s;
+}
+
+#headers-buttons > div:hover {
+    background-color: #d2d2d2;
+}
+
+.bg-light-gray {
+    background-color: #d2d2d2;
+}

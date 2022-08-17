@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request, HTTPException, Depends
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -19,6 +19,12 @@ app.mount("/csv_files", StaticFiles(directory="csv_files"), name="csv_files")
 templates = Jinja2Templates(directory="templates")
 
 
+async def get_by_filename_or_error(filename: str):
+    if not await CsvFile.filter(filename=filename).count():
+        raise HTTPException(status_code=404, detail=f"Csv File '{filename}' not found")
+    return filename
+
+
 @app.get("/", response_class=HTMLResponse)
 async def home_page(request: Request):
     return templates.TemplateResponse("home.html", {"request": request})
@@ -30,10 +36,13 @@ async def fetches_page(request: Request):
 
 
 @app.get('/fetches/{filename}')
-async def fetches_page(request: Request, filename: str):
-    if not await CsvFile.filter(filename=filename).count():
-        raise HTTPException(status_code=404, detail=f"Csv File '{filename}' not found")
+async def fetches_page(request: Request, filename: str = Depends(get_by_filename_or_error)):
     return templates.TemplateResponse("fetch_detail.html", {"request": request, 'filename': filename})
+
+
+@app.get('/fetches/{filename}/count')
+async def fetches_page(request: Request, filename: str = Depends(get_by_filename_or_error)):
+    return templates.TemplateResponse("fetch_detail_value_count.html", {"request": request, 'filename': filename})
 
 
 @app.get("/fetch/characters")
@@ -57,9 +66,7 @@ async def all_fetches():
 
 
 @app.get("/fetch/{filename}", response_model=CsvFile_Pydantic)
-async def fetch_page(filename: str):
-    if not await CsvFile.filter(filename=filename).count():
-        raise HTTPException(status_code=404, detail=f"Csv File '{filename}' not found")
+async def fetch_page(filename: str = Depends(get_by_filename_or_error)):
     return await CsvFile.get(filename=filename)
 
 
@@ -72,5 +79,3 @@ register_tortoise(
     generate_schemas=True,
     add_exception_handlers=True,
 )
-
-
